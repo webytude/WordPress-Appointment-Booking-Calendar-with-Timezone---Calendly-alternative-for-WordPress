@@ -1,0 +1,143 @@
+/**
+ * All of the CSS for your public-facing functionality should be
+ * included in this file.
+ */
+.page-id-1059 .content-area .container,
+.page-id-1080 .content-area .container
+{ max-width: 900px; }
+
+.wt-appointment{
+	border: 1px solid #d8d8d8;
+	-webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25); 
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25); 
+}
+.wt-appointment .wt-header{
+	border-bottom: 1px solid #d8d8d8;
+	padding: 15px 20px;
+	margin-bottom: 20px;
+}
+.wt-appointment .wt-header h2{
+	margin-bottom: 0px;
+}
+.wt-appointment .cta-button{
+	width: 100%;
+	background-color: #3b5998;
+    border: 1px solid #3b5998;
+    border-radius: 5px;
+    padding: 5px 10px;
+    text-align: center;
+    color: #ffffff;
+    display: inline-block;
+}
+.wt-appointment .cta-button-outline{
+	width: 100%;
+    border: 1px solid #3b5998;
+    border-radius: 5px;
+    padding: 5px 10px;
+    text-align: center;
+    display: inline-block;
+}
+.wt-calendar{
+	display: -ms-flexbox;
+    display: -webkit-box;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+.wt-appointment .calendar{
+	-ms-flex: 0 0 65%;
+    -webkit-box-flex: 0;
+    flex: 0 0 65%;
+}
+.wt-appointment .times{
+	-ms-flex: 0 0 35%;
+    -webkit-box-flex: 0;
+    flex: 0 0 35%;
+    max-height: 590px;
+
+    padding-right: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.wt-appointment ul{
+	list-style: none;
+	margin: 0px;
+}
+.wt-appointment ul li{
+	display: -ms-flexbox;
+    display: -webkit-box;
+    display: flex;
+    -ms-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    margin-bottom: 15px;
+    list-style: none;
+}
+.wt-appointment ul li:before{
+    display: none;
+}
+.wt-appointment .times .time{
+    -webkit-box-flex: 0;
+	-ms-flex: 0 0 100%;
+    flex: 0 0 100%;
+    min-width: 100%;
+
+    transition: all 0.3s ease;
+}
+.wt-appointment .times .time-confirm{
+	-ms-flex: 0 0 43%;
+    flex: 0 0 43%;
+    min-width: 43%;
+
+	transition: all 0.3s ease;
+    transition-property: width, transform;
+    transform: translateX(40px);
+}
+.wt-appointment ul li.active .time{
+	-ms-flex: 0 0 52%;
+    flex: 0 0 52%;
+    min-width: 52%;
+}
+.wt-appointment ul li.active .time-confirm{
+	transform: translateX(10px);
+}
+.wt-appointment .appointments-form-blk{
+	padding: 15px;
+	display: none;
+}
+.wt-appointment .input-group{
+	border: none;
+	padding: 0px;
+}
+.wt-appointment .appointments-form .back{
+	font-family: 'pignose-calendar-icon' !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    float: right;
+}
+.wt-appointment .appointments-form .back:before {
+    content: '\e90b';
+}
+.wt-appointment .appointments-form .input-group{
+	margin-bottom: 20px;
+}
+.wt-appointment .appointments-form input{
+	margin-bottom: 0px;
+}
+.wt-appointment .appointments-form .error-message{
+	color: #d42525;
+	font-size: 18px;
+}
+.wt-appointment .appointments-form .ajax-message .success-message{
+	color: #30D425;
+	font-size: 20px;
+	margin-bottom: 0px;
+}
+.wt-appointment .appointments-form .ajax-message .error-message{
+	color: #d42525;
+	font-size: 20px;
+	margin-bottom: 0px;
+}

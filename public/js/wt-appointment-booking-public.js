@@ -29,14 +29,48 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
-	jQuery('.calendar').pignoseCalendar({
-		select: function(date, context) {
-	        // console.log(date[0]['_i']);
-	        var $this = context.element;
 
+	// const today = moment();
+	const tomorrow  = moment().add(1, 'days');
+	
+	jQuery('.calendar').pignoseCalendar({
+		// lang:'ar',
+		week: 1,
+		minDate: tomorrow.format('YYYY-MM-DD'),
+		init: function(context) {
+			var $this = context.element;
+	        var y = context.dateManager.year;
+	        var m = context.dateManager.month;
+	        var d = context.dateManager.day + 1;
+	        $this.closest('.wt-appointment').find(".appointments-form-blk input[name='wt-date']").val( y+"-"+m+"-"+d );
+	    },
+		select: function(date, context) {
+	        var $this = context.element;
 	        $this.closest('.wt-appointment').find(".appointments-form-blk input[name='wt-date']").val( date[0]['_i'] );
+
+	        wt_get_user_timezone( $this );
 	    }
 	});
+
+	jQuery('.select2').select2();
+
+	jQuery('.select2').on('select2:select', function (e) {
+		var selected = e.params.data.id;
+		var $this = jQuery(this);
+		$this.closest('.wt-appointment').find(".appointments-form-blk input[name='wt-timezone']").val( selected );
+	});
+
+	jQuery('.wt-appointment .siteloader').hide();
+
+
+	// ==============================================================================
+	// Add your comments here
+	// ==============================================================================
+	// jQuery( ".appointments-form" ).submit(function( event ) {
+	jQuery('.wt-appointment').on('change', '.timezone-list', function(event) {
+        event.preventDefault();
+        wt_get_user_timezone( jQuery(this) );
+    }); 
 
 	jQuery('.wt-appointment').on('click', '.time a', function(event) {
 		event.preventDefault();
@@ -107,20 +141,59 @@
                 setTimeout(function(){
                     $thisForm.find('.ajax-message').html('');
                     
-                	location.reload();
+                    if (typeof data.redirect !== "undefined") { 
+                    	window.location.href = data.redirect;
+                    }
+                    else{
+                		location.reload();
+                    }
+
                 }, 3000);
             },
             error:function(){
                 console.log("Error: There is some issue please try again.")
             },
             beforeSend:function(){
-                jQuery('.siteloader').show();
+                jQuery('.wt-appointment .siteloader').show();
             },
             complete: function () {
-                jQuery('.siteloader').hide();
+                jQuery('.wt-appointment .siteloader').hide();
             },
         });
     }); 
 
 
 })( jQuery );
+
+
+
+function wt_get_user_timezone( $this ) {
+	
+	var $thisForm = $this.closest('.wt-appointment')
+
+	var timezone = $thisForm.find(".timezone-list :selected").val();
+	var date = $thisForm.find("input[name='wt-date']").val();
+
+	jQuery.ajax({
+        type: 'POST',
+        url: wt_object.ajaxurl,
+        data: {action: "wt_get_user_timezone", timezone:timezone, date:date},            
+        dataType: 'json',
+        // contentType: false,
+        // processData: false,
+        success:function(data){
+        	
+            $thisForm.find('.times').html(data.times_html);
+
+        },
+        error:function(){
+            console.log("Error: There is some issue please try again.")
+        },
+        beforeSend:function(){
+            jQuery('.wt-appointment .siteloader').show();
+        },
+        complete: function () {
+            jQuery('.wt-appointment .siteloader').hide();
+        },
+    });
+}

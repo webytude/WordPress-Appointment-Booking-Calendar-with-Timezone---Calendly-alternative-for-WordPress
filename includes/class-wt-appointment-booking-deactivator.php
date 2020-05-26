@@ -30,7 +30,9 @@ class Wt_Appointment_Booking_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {
-
+		global $table_prefix, $wpdb;
+		$appointments = $table_prefix . "wt_appointments";
+	    $wpdb->query( "DROP TABLE IF EXISTS $appointments" );
 	}
 
 }

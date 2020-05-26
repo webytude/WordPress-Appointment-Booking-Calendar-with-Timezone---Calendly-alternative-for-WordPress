@@ -38,19 +38,24 @@ class Wt_Appointment_Booking_Activator {
 
         	$appointments = $table_prefix . "wt_appointments";
 
+                /*
         	$event_sql = " CREATE TABLE ". $event_types . " ( ";
                 $event_sql .= "  ID int(11) NOT NULL AUTO_INCREMENT, ";
                 $event_sql .= "  event_name MEDIUMTEXT DEFAULT NULL, ";
                 $event_sql .= "  event_description MEDIUMTEXT DEFAULT NULL, ";
                 $event_sql .= "  PRIMARY KEY  (ID) "; 
                 $event_sql .= ") ".$charset_collate." ; ";
+                */
 
-                $event_sql .= " CREATE TABLE ". $appointments . " ( ";
+                $event_sql = " CREATE TABLE ". $appointments . " ( ";
                 $event_sql .= "  app_id int(11) NOT NULL AUTO_INCREMENT, ";
                 $event_sql .= "  app_name varchar(255) DEFAULT NULL, ";
                 $event_sql .= "  app_time DATETIME DEFAULT NULL, ";
+                $event_sql .= "  app_user_time DATETIME DEFAULT NULL, ";
+                $event_sql .= "  app_timezone varchar(500) DEFAULT NULL, ";
                 $event_sql .= "  app_email varchar(500) DEFAULT NULL, ";
                 $event_sql .= "  app_comments MEDIUMTEXT DEFAULT NULL, ";
+                $event_sql .= "  app_status varchar(52) DEFAULT 'upcoming', ";
                 $event_sql .= "  app_booked_time DATETIME DEFAULT NULL, ";
                 $event_sql .= "  PRIMARY KEY  (app_id) "; 
                 $event_sql .= ") ".$charset_collate." ; ";

@@ -98,7 +98,9 @@ class Wt_Appointment_Booking_Admin {
 
 		register_setting('wt_appointments_settings', 'wt_appointments_options');
 
-		register_setting('wt_appointments_settings', 'wt_register_body');
+		register_setting('wt_appointments_settings', 'wt_confi_body');
+		register_setting('wt_appointments_settings', 'wt_admin_confi_body');
+		register_setting('wt_appointments_settings', 'wt_cancel_body');
 		register_setting('wt_appointments_settings', 'wt_hourly_body');
 		register_setting('wt_appointments_settings', 'wt_daily_body');
 
@@ -110,6 +112,33 @@ class Wt_Appointment_Booking_Admin {
 
 		$wt_appointments = get_option('wt_appointments_options');
 
+		$time_start = $wt_appointments['time']['start'];
+		$time_end = $wt_appointments['time']['end'];
+		$time_inte = $wt_appointments['time']['inte'];
+
+		$success_message = $wt_appointments['general']['success_message'];
+		$success_redirect_page = $wt_appointments['general']['success_redirect_page'];
+		$appointment_title = $wt_appointments['general']['appointment_title'];
+		$form_title = $wt_appointments['general']['form_title'];
+		$form_button = $wt_appointments['general']['form_button'];
+		$admin_email = $wt_appointments['general']['admin_email'];
+
+		$admin_confi_subject = $wt_appointments['admin_confi']['subject'];
+		$admin_confi_heading = $wt_appointments['admin_confi']['heading'];
+		$admin_confi_body = get_option('wt_admin_confi_body');
+
+		$confi_subject = $wt_appointments['confi']['subject'];
+		$confi_heading = $wt_appointments['confi']['heading'];
+		$confi_body = get_option('wt_confi_body');
+
+		$cancel_subject = $wt_appointments['cancel']['subject'];
+		$cancel_heading = $wt_appointments['cancel']['heading'];
+		$cancel_body = get_option('wt_cancel_body');
+
+		$daily_subject = $wt_appointments['daily']['subject'];
+		$daily_heading = $wt_appointments['daily']['heading'];
+		$daily_body = get_option('wt_daily_body');
+
 		$hourly_subject = $wt_appointments['hourly']['subject'];
 		$hourly_heading = $wt_appointments['hourly']['heading'];
 		$hourly_body = get_option('wt_hourly_body');
@@ -120,29 +149,262 @@ class Wt_Appointment_Booking_Admin {
         	<form method="post" action="options.php">
         		<?php settings_fields('wt_appointments_settings'); ?>
 
-        		<table class="form-table welcome-panel">
-			   		<tr>
+        		<table class="wt-main-table form-table welcome-panel" cellspacing="0" cellpadding="0">
+        			<tr>
 			   			<td>
-			   				<table class="form-table-group">
+			   				<table class="wt-table-group">
 								<tbody>
 									<tr>
-										<th colspan="2"><h2>User Mail - Hourly Reminder</h2></th>
+										<th colspan="2"><h2><?php _e('Time Settings', 'book-appointment-online'); ?></h2></th>
 									</tr>
 									<tr>
-										<th scope="row"><label for="wt_hourly_email_sub"><?php _e('Email Subject', 'book-appointment-online'); ?></label></th>
+										<th scope="row"><label for="wt_time_start"><?php _e('Starting Time', 'book-appointment-online'); ?></label></th>
 										<td>
-										<input name="wt_appointments[hourly][subject]" type="text" id="wt_hourly_email_sub" value="<?php echo $hourly_subject; ?>" class="regular-text">
+											<select name="wt_appointments_options[time][start]" id="wt_time_start">
+												<?php
+												$times = hoursRange( '00:00', '23:00', '60' );
+												foreach ($times as $key => $value) {
+													echo "<option value='$key' ".selected( $time_start, $key ).">$value</option>";
+												}
+												?>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<th scope="row"><label for="wt_time_end"><?php _e('Ending Time', 'book-appointment-online'); ?></label></th>
+										<td>
+											<select name="wt_appointments_options[time][end]" id="wt_time_end">
+												<?php
+												$times = hoursRange( '00:00', '23:00', '60' );
+												foreach ($times as $key => $value) {
+													echo "<option value='$key' ".selected( $time_end, $key ).">$value</option>";
+												}
+												?>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<th scope="row"><label for="wt_time_end"><?php _e('Time Interval', 'book-appointment-online'); ?></label></th>
+										<td>
+											<select name="wt_appointments_options[time][inte]" id="wt_time_end">
+												<?php
+												$times = array(15,30,45,60);
+												foreach ($times as $key => $value) {
+													echo "<option value='$value' ".selected( $time_inte, $value ).">$value Mins</option>";
+												}
+												?>
+											</select>
+										</td>
+									</tr>
+
+								</tbody>
+							</table>
+			   			</td>
+			   		</tr>
+			   		<tr>
+			   			<td>
+			   				<table class="wt-table-group">
+								<tbody>
+									<tr>
+										<th colspan="2"><h2><?php _e('General Settings', 'book-appointment-online'); ?></h2></th>
+									</tr>
+									<tr>
+										<th scope="row"><label for="wt_success_message"><?php _e('Success Message', 'book-appointment-online'); ?></label></th>
+										<td>
+											<input name="wt_appointments_options[general][success_message]" type="text" id="success_message" value="<?php echo $success_message; ?>" class="regular-text">
+										</td>
+									</tr>
+									<tr>
+										<th scope="row"><label for="success_redirect_page"><?php _e('Success URL', 'book-appointment-online'); ?></label></th>
+										<td>
+											<input name="wt_appointments_options[general][success_redirect_page]" type="text" id="success_redirect_page" value="<?php echo $success_redirect_page; ?>" class="regular-text">
+										</td>
+									</tr>
+									<tr>
+										<th scope="row"><label for="appointment_title"><?php _e('Appointment Title', 'book-appointment-online'); ?></label></th>
+										<td>
+											<input name="wt_appointments_options[general][appointment_title]" type="text" id="appointment_title" value="<?php echo $appointment_title; ?>" class="regular-text">
+										</td>
+									</tr>
+									<tr>
+										<th scope="row"><label for="form_title"><?php _e('Form Title', 'book-appointment-online'); ?></label></th>
+										<td>
+											<input name="wt_appointments_options[general][form_title]" type="text" id="form_title" value="<?php echo $form_title; ?>" class="regular-text">
+										</td>
+									</tr>
+									<tr>
+										<th scope="row"><label for="form_button"><?php _e('Form Button', 'book-appointment-online'); ?></label></th>
+										<td>
+											<input name="wt_appointments_options[general][form_button]" type="text" id="form_button" value="<?php echo $form_button; ?>" class="regular-text">
+										</td>
+									</tr>
+									<tr>
+										<th scope="row"><label for="admin_email"><?php _e('Admin Email', 'book-appointment-online'); ?></label></th>
+										<td>
+											<input name="wt_appointments_options[general][admin_email]" type="email" id="admin_email" value="<?php echo $admin_email; ?>" class="regular-text">
+										</td>
+									</tr>
+
+								</tbody>
+							</table>
+			   			</td>
+			   		</tr>
+			   		<tr>
+			   			<td>
+			   				<table class="wt-table-group">
+								<tbody>
+									<tr>
+										<th colspan="2"><h2><?php _e('Admin Confirmation Notification Email', 'book-appointment-online'); ?></h2></th>
+									</tr>
+									<tr>
+										<th scope="row"><label for="wt_admin_confi_email_sub"><?php _e('Email Subject', 'book-appointment-online'); ?></label></th>
+										<td>
+										<input name="wt_appointments_options[admin_confi][subject]" type="text" id="wt_confi_email_sub" value="<?php echo $admin_confi_subject; ?>" class="regular-text">
 										</td>
 									</tr>
 									 
 									<tr>
-										<th scope="row"><label for="wt_hourly_email_heading"><?php _e('Email heading', 'book-appointment-online'); ?></label></th>
+										<th scope="row"><label for="wt_confi_email_heading"><?php _e('Email Heading', 'book-appointment-online'); ?></label></th>
 										<td>
-										<input name="wt_appointments[hourly][heading]" type="text" id="wt_hourly_email_heading" value="<?php echo $hourly_heading; ?>" class="regular-text">
+										<input name="wt_appointments_options[admin_confi][heading]" type="text" id="wt_confi_email_heading" value="<?php echo $admin_confi_heading; ?>" class="regular-text">
 										</td>
 									</tr>
 									<tr>
-										<th scope="row"><label for="wt_hourly_email_body"><?php _e('Email Body', 'book-appointment-online'); ?></label></th>
+										<th scope="row"><label><?php _e('Email Body', 'book-appointment-online'); ?></label></th>
+										<td>
+											<?php
+											wp_editor( $admin_confi_body, 'wt_admin_confi_body', $settings = array('textarea_rows'=> '10') );
+											?>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+			   			</td>
+			   		</tr>
+        			<tr>
+			   			<td>
+			   				<table class="wt-table-group">
+								<tbody>
+									<tr>
+										<th colspan="2"><h2><?php _e('Confirmation Email', 'book-appointment-online'); ?></h2></th>
+									</tr>
+									<tr>
+										<th scope="row"><label for="wt_confi_email_sub"><?php _e('Email Subject', 'book-appointment-online'); ?></label></th>
+										<td>
+										<input name="wt_appointments_options[confi][subject]" type="text" id="wt_confi_email_sub" value="<?php echo $confi_subject; ?>" class="regular-text">
+										</td>
+									</tr>
+									 
+									<tr>
+										<th scope="row"><label for="wt_confi_email_heading"><?php _e('Email Heading', 'book-appointment-online'); ?></label></th>
+										<td>
+										<input name="wt_appointments_options[confi][heading]" type="text" id="wt_confi_email_heading" value="<?php echo $confi_heading; ?>" class="regular-text">
+										</td>
+									</tr>
+									<tr>
+										<th scope="row"><label><?php _e('Email Body', 'book-appointment-online'); ?></label></th>
+										<td>
+											<?php
+											// $name = 'wt_appointments[hourly][body]';
+									        wp_editor( $confi_body, 'wt_confi_body', $settings = array('textarea_rows'=> '10') );
+											?>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+			   			</td>
+			   		</tr>
+
+			   		<tr>
+			   			<td>
+			   				<table class="wt-table-group">
+								<tbody>
+									<tr>
+										<th colspan="2"><h2><?php _e('Cancellation Email', 'book-appointment-online'); ?></h2></th>
+									</tr>
+									<tr>
+										<th scope="row"><label for="wt_cancel_email_sub"><?php _e('Email Subject', 'book-appointment-online'); ?></label></th>
+										<td>
+										<input name="wt_appointments_options[cancel][subject]" type="text" id="wt_cancel_email_sub" value="<?php echo $cancel_subject; ?>" class="regular-text">
+										</td>
+									</tr>
+									 
+									<tr>
+										<th scope="row"><label for="wt_cancel_email_heading"><?php _e('Email Heading', 'book-appointment-online'); ?></label></th>
+										<td>
+										<input name="wt_appointments_options[cancel][heading]" type="text" id="wt_cancel_email_heading" value="<?php echo $cancel_heading; ?>" class="regular-text">
+										</td>
+									</tr>
+									<tr>
+										<th scope="row"><label><?php _e('Email Body', 'book-appointment-online'); ?></label></th>
+										<td>
+											<?php
+											// $name = 'wt_appointments[hourly][body]';
+									        wp_editor( $cancel_body, 'wt_cancel_body', $settings = array('textarea_rows'=> '10') );
+											?>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+			   			</td>
+			   		</tr>
+
+			   		<tr>
+			   			<td>
+			   				<table class="wt-table-group">
+								<tbody>
+									<tr>
+										<th colspan="2"><h2><?php _e('Reminder 1 (Before 24 Hours)', 'book-appointment-online'); ?></h2></th>
+									</tr>
+									<tr>
+										<th scope="row"><label for="wt_daily_email_sub"><?php _e('Email Subject', 'book-appointment-online'); ?></label></th>
+										<td>
+										<input name="wt_appointments_options[daily][subject]" type="text" id="wt_daily_email_sub" value="<?php echo $daily_subject; ?>" class="regular-text">
+										</td>
+									</tr>
+									 
+									<tr>
+										<th scope="row"><label for="wt_daily_email_heading"><?php _e('Email Heading', 'book-appointment-online'); ?></label></th>
+										<td>
+										<input name="wt_appointments_options[daily][heading]" type="text" id="wt_daily_email_heading" value="<?php echo $daily_heading; ?>" class="regular-text">
+										</td>
+									</tr>
+									<tr>
+										<th scope="row"><label><?php _e('Email Body', 'book-appointment-online'); ?></label></th>
+										<td>
+											<?php
+											// $name = 'wt_appointments[daily][body]';
+									        wp_editor( $daily_body, 'wt_daily_body', $settings = array('textarea_rows'=> '10') );
+											?>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+			   			</td>
+			   		</tr>
+
+			   		<tr>
+			   			<td>
+			   				<table class="wt-table-group">
+								<tbody>
+									<tr>
+										<th colspan="2"><h2><?php _e('Reminder 2 (Before 30 Minutes)', 'book-appointment-online'); ?></h2></th>
+									</tr>
+									<tr>
+										<th scope="row"><label for="wt_hourly_email_sub"><?php _e('Email Subject', 'book-appointment-online'); ?></label></th>
+										<td>
+										<input name="wt_appointments_options[hourly][subject]" type="text" id="wt_hourly_email_sub" value="<?php echo $hourly_subject; ?>" class="regular-text">
+										</td>
+									</tr>
+									 
+									<tr>
+										<th scope="row"><label for="wt_hourly_email_heading"><?php _e('Email Heading', 'book-appointment-online'); ?></label></th>
+										<td>
+										<input name="wt_appointments_options[hourly][heading]" type="text" id="wt_hourly_email_heading" value="<?php echo $hourly_heading; ?>" class="regular-text">
+										</td>
+									</tr>
+									<tr>
+										<th scope="row"><label><?php _e('Email Body', 'book-appointment-online'); ?></label></th>
 										<td>
 											<?php
 											// $name = 'wt_appointments[hourly][body]';
@@ -152,9 +414,10 @@ class Wt_Appointment_Booking_Admin {
 									</tr>
 								</tbody>
 							</table>
-							<?php do_action('wt_appointments_email_options'); ?>
 			   			</td>
 			   		</tr>
+					
+					<?php do_action('wt_appointments_email_options'); ?>
 			   		<tr>
 			   			<td><?php submit_button('Save', 'primary'); ?></td>
 			   		</tr>
@@ -163,16 +426,27 @@ class Wt_Appointment_Booking_Admin {
 	   		</form>
 
 		   	<style type="text/css">
-		   		/*
-		   		.form-table-group {
-				    border: 1px solid #ddd;
+		   		
+		   		.wt-main-table{
+				    /*border: 1px solid #ddd;*/
 				    width: 100%;
+				    border-collapse: collapse;
+				    background: #fff;
 				}
-				.form-table-group th,
-				.form-table-group td{
+				.wt-main-table .wt-table-group{
+					width: 100%;
+					border-collapse: collapse;
+				}
+				.wt-main-table .wt-table-group th,
+				.wt-main-table .wt-table-group td{
 					border: 1px solid #ddd;
+					padding: 15px;
 				}
-				*/
+				.wt-main-table .regular-text{
+					width: 50%;
+					max-width: 100%
+				}
+				
 		   	</style>
 		</div>
         <?php

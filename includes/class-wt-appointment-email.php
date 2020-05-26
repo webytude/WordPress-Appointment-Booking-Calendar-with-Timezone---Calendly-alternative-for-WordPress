@@ -71,17 +71,21 @@ class Wt_Appointment_Email {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
-		
+		/*
 		$upload = wp_upload_dir();
 		$permissions = 755;
 		$upload_dir = $upload['basedir'] . "/wt-log/";
 		if (!is_dir($upload_dir)) mkdir($upload_dir, $permissions);
 		$umask = umask($oldmask);
 		$chmod = chmod($upload_dir, $permissions);
+		*/
 
 		$upload_dir = wp_upload_dir();
-		$this->wt_path = $upload_dir['basedir'] . "/wt-log/";
-		$this->wt_url = $upload_dir['baseurl'] . "/wt-log/";
+		// $this->wt_path = $upload_dir['basedir'] . "/wt-log/";
+		// $this->wt_url = $upload_dir['baseurl'] . "/wt-log/";
+
+		$this->wt_path = $upload_dir['basedir'] . "/ip2location/";
+		$this->wt_url = $upload_dir['baseurl'] . "/ip2location/";
 	}
 
 	public function run() {
@@ -96,6 +100,15 @@ class Wt_Appointment_Email {
         $myfile = fopen($file, "a") or die("Unable to open file!");
         fwrite($myfile, "$text"."\n");
         fclose($myfile);
+
+
+        /*
+        $file = $this->wt_url."/{$name}---{$date}.txt"; 
+        $myfile = fopen($file, "a") or die("Unable to open file!");
+        fwrite($myfile, "$text"."\n");
+        fclose($myfile);
+        */
+
     }
 
     // ==============================================================================
@@ -105,9 +118,12 @@ class Wt_Appointment_Email {
 
 		$email_dir_url = plugin_dir_url( __DIR__ ) ."templates/emails/";
 
+		/*
 		$html = file_get_contents( $email_dir_url ."/edm-header.html" );
 	    $html .= file_get_contents( $email_dir_url ."/edm-body.html" );
 	    $html .= file_get_contents( $email_dir_url ."/edm-footer.html" );
+	    */
+	    $html = '{{edm_body}}';
 
 
 	    $site_url = site_url();
@@ -120,17 +136,14 @@ class Wt_Appointment_Email {
 
 
 	    $subject = $request['subject'];
-	    $heading = $request['heading'];	    
+	    $heading = $request['heading'];
 	    $body = $request['body'];
+
 
 	    ## if add extra detail more them backend option
 	    $body .= $extra_body;
 
-	    $request['save_file'] = true;
-
-	    $fullname = $request['fullname'];
 	    $sent_to = $request['sent_to'];
-
 	    $admin_email = get_option('admin_email');
 
 	    $site_title = html_entity_decode(get_bloginfo( 'name' ));
@@ -138,16 +151,31 @@ class Wt_Appointment_Email {
 	    $headers[] = 'From: '.$site_title.' <'.$admin_email.'>';
 	    $headers[] = 'Content-Type: text/html; charset=UTF-8';
 
-	    ## this for backend content
+
+	    // $event_date = date_i18n( "l, M jS", strtotime( $request['event_date'] ) );
+	    $event_date = date( "l, M jS", strtotime( $request['event_date'] ) );
+
+	    $invitee_full_name = $request['invitee_full_name'];
+	    // $event_time = date_i18n( "h:i a", strtotime( $request['event_time'] ) );
+	    $event_time = date( "h:i a", strtotime( $request['event_time'] ) );
+
+	    $event_host_name = $request['event_host_name'];
+	    $event_time = date( "h:i a", strtotime( $request['event_time'] ) );
+	    $event_host_time = date( "h:i a", strtotime( $request['event_host_time'] ) );
+
+	    $comments  = isset( $request['comments'] ) ? $request['comments'] : '';
+
 	    $find = array('{{logo}}', '{{fullname}}', '{{edm_email}}', '{{edm_phone}}','{{edm_tel}}', '{{footer_edm_text}}', '{{heading}}', '{{edm_body}}', '{{site_url}}');
 	    $replace = array($logo, $fullname, $email, $phone, $edm_tel, $footer_detail, $heading, $body, $site_url);
-
-	    $html = str_replace($find, $replace, $html);
-
-	    $find = array('{{logo}}', '{{fullname}}', '{{edm_email}}', '{{edm_phone}}','{{edm_tel}}', '{{footer_edm_text}}', '{{heading}}', '{{edm_body}}', '{{site_url}}');
-	    $replace = array($logo, $fullname, $email, $phone, $edm_tel, $footer_detail, $heading, $body, $site_url);
-
 	    $body = str_replace($find, $replace, $html);
+
+	    ## this for backend content
+	    $find = array('{{event_date}}', '{{invitee_full_name}}', '{{event_time}}', '{{event_host_name}}', '{{event_host_time}}', '{{comments}}');
+	    $replace = array($event_date, $invitee_full_name, $event_time, $event_host_name, $event_host_time, $comments);
+
+	    $subject	= str_replace($find, $replace, $subject);
+	    $heading 	= str_replace($find, $replace, $heading);
+	    $body 		= str_replace($find, $replace, $body);
 
 	    if( isset( $request['die'] ) ){
 		    echo $body;die;

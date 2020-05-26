@@ -18,12 +18,12 @@
     body{width:100% !important; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; margin:0; padding:0;}
     .ExternalClass {width:100%;}
     .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {line-height: 100%;}
-    #backgroundTable {margin:0; padding:0; width:100% !important; line-height: 100% !important; background: rgba(59, 89, 152, 0.2);}
+    #backgroundTable {margin:0; padding:0; width:100% !important; line-height: 100% !important;}
     img {outline:none; text-decoration:none; -ms-interpolation-mode: bicubic;}
     a img {border:none;}
     .image_fix {display:block;}
     p {margin: 1em 0;}
-    h1, h2, h3, h4, h5, h6 {color: #3b5998 !important;font-family:"Roboto Slab", serif}
+    h1, h2, h3, h4, h5, h6 {color: #079e47 !important;font-family:"Roboto Slab", serif}
 
     h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {color: blue !important;}
 
@@ -134,21 +134,92 @@
     <!-- Tables are the most common way to format your email consistently. Set your table widths inside cells and in most cases reset cellpadding, cellspacing, and border to zero. Use nested tables as a way to space effectively in your message. -->
     
 
-    <table cellpadding="0" cellspacing="0" border="0" align="center" width="600" class="container" style="border: 2px solid #3b5998;">
+    <table cellpadding="0" cellspacing="0" border="0" align="center" width="600" class="container" style="border: 2px solid #079e47;">
       <tr>
         <td class='movableContentContainer bgItem'>
 
           <div class='movableContent'>
-            <table cellpadding="0" cellspacing="0" border="0" align="center" width="600" class="container" style="background:#3b5998">
+            <table cellpadding="0" cellspacing="0" border="0" align="center" width="600" class="container">
               <tr>
                 <td width="200" valign="top" align="center">
                   <div class="contentEditableContainer contentImageEditable">
-                            <div class="contentEditable" align='center' style="box-shadow:0px 4px 10px 0px rgba(6, 10, 45, 0.05);padding: 27px 0">
-                                <img src="{{logo}}" width="200" alt='Fitness Intellect' data-default="placeholder" />
+                            <div class="contentEditable" align='center' style="box-shadow:0px 4px 10px 0px rgba(6, 10, 45, 0.05)">
+                                <img src="{{logo}}" width="250" height="50"  alt='What Ability'  data-default="placeholder" />
                             </div>
                           </div>
                 </td>
               </tr>
             </table>
           </div>
-          <!-- EDM body start -->
+
+          <div class='movableContent' style="padding:50px 0">
+            <table cellpadding="0" cellspacing="0" border="0" align="center" width="600" class="container">
+              <tr>
+                <td width="100%" colspan="3" align="center" style="padding-bottom:30px;">
+                  <div class="contentEditableContainer contentTextEditable">
+                            <div class="contentEditable" align='center' >
+                                <h2>{{heading}}</h2>
+                            </div>
+                          </div>
+                </td>
+              </tr>
+              <tr>
+                <td width="100%" align="center" style="padding: 0 30px">
+                  <div class="contentEditableContainer contentTextEditable">
+                    <div class="contentEditable" align='left' >
+                        <strong>Hi {{name}},</strong>
+                        <p>You have a new enquiry, here are the detials as below: </p>
+                        <p>{{all}}</p>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <div class='movableContent'>
+            <table cellpadding="0" cellspacing="0" border="0" align="left" width="600" class="container" style="background:#0e3580">
+              <tr>
+                <td width="70%" valign="middle" style="padding:27px 30px;text-align: left;">
+                  <div class="contentEditableContainer contentTextEditable">
+                    <div class="contentEditable" align='left' >                               
+                      <span style="font-size:12px;color:#FFF;font-family:Helvetica, Arial, sans-serif;line-height:200%;">
+                        Email : <a style="font-size:12px;color:#FFF;" href="mailto:{{edm_email}}">{{edm_email}}</a> | 
+                        Phone : <a style="font-size:12px;color:#FFF;" href="tel:{{edm_tel}}">{{edm_phone}}</a>
+                      </span>
+                      <br/>
+                      <span style="font-size:12px;color:#FFF;font-family:Helvetica, Arial, sans-serif;line-height:200%;">
+                       {{footer_edm_text}}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+                <td width="30%" valign="middle" style="padding:27px 15px;text-align: center;">
+                  <a href="#" style="text-decoration:none;">
+                    <img src="{{site_url}}/includes/email-templates/images/email-fb.png" alt="" />
+                  </a>
+                  <a href="#" style="text-decoration:none;">
+                    <img src="{{site_url}}/includes/email-templates/images/email-insta.png" alt="" />
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+
+        </td>
+      </tr>
+    </table>
+
+    
+    
+
+  </td></tr></table>
+  
+    </td>
+  </tr>
+  </table>
+  <!-- End of wrapper table -->
+
+</body>
+</html>

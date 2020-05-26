@@ -59,6 +59,16 @@ class Wt_Appointment_Email_Schedule {
 	 */
 	private $wt_url;
 
+
+	/**
+	 * The WT Set admin email
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $version    The current version of this plugin.
+	 */
+	private $admin_email;
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -71,26 +81,48 @@ class Wt_Appointment_Email_Schedule {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
-		
+		/*
 		$upload = wp_upload_dir();
 		$permissions = 755;
 		$upload_dir = $upload['basedir'] . "/wt-log/";
 		if (!is_dir($upload_dir)) mkdir($upload_dir, $permissions);
 		$umask = umask($oldmask);
 		$chmod = chmod($upload_dir, $permissions);
+		*/
 
 		$upload_dir = wp_upload_dir();
-		$this->wt_path = $upload_dir['basedir'] . "/wt-log/";
-		$this->wt_url = $upload_dir['baseurl'] . "/wt-log/";
+		// $this->wt_path = $upload_dir['basedir'] . "/wt-log/";
+		// $this->wt_url = $upload_dir['baseurl'] . "/wt-log/";
+
+		$this->wt_path = $upload_dir['basedir'] . "/ip2location/";
+		$this->wt_url = $upload_dir['baseurl'] . "/ip2location/";
+
+		$wt_appointments = get_option('wt_appointments_options');
+		if( !empty( $wt_appointments['general']['admin_email'] ) ){
+        	$this->admin_email = $wt_appointments['general']['admin_email'];
+        }
+        else{
+        	$this->admin_email = get_option( 'admin_email' );
+        }
 	}
 
 	public function run() {
 
 		// register_activation_hook( __FILE__, array( $this, 'activate_wt_cron_hook' ) );
+		add_filter( 'cron_schedules', array( $this, 'add_twice_in_hours' ) );
 
 	    add_action( 'wt_daily_email_schedule', array( $this, 'wt_daily_email_schedule_fun' ));
 	    add_action( 'wt_hourly_email_schedule', array( $this, 'wt_hourly_email_schedule_fun' ));
 	    // add_action( 'admin_init', array( $this, 'wt_daily_email_schedule_fun' ));
+	}
+
+	
+	public function add_twice_in_hours( $schedules ) {
+	    $schedules['twice_in_hours'] = array(
+	            'interval'  => 1800,
+	            'display'   => __( 'Every 30 Minutes', 'textdomain' )
+	    );
+	    return $schedules;
 	}
 
 	public function activate_wt_cron_hook() {
@@ -99,7 +131,8 @@ class Wt_Appointment_Email_Schedule {
 	        wp_schedule_event(time(), 'daily', 'wt_daily_email_schedule');
 	    }
 	    if ( !wp_next_scheduled( 'wt_hourly_email_schedule' ) ) {
-		    wp_schedule_event(time(), 'hourly', 'wt_hourly_email_schedule');
+		    // wp_schedule_event(time(), 'hourly', 'wt_hourly_email_schedule');
+		    wp_schedule_event(time(), 'twice_in_hours', 'wt_hourly_email_schedule');
 		}
 
 	}
@@ -112,38 +145,62 @@ class Wt_Appointment_Email_Schedule {
 	 */
 	public function wt_hourly_email_schedule_fun() {
 		global $wpdb;
+
 	    $table_appointments = $wpdb->prefix . "wt_appointments";
+
+	    $email = new Wt_Appointment_Email( $this->plugin_name, $this->version );
 
 	   	$current_time = current_time( 'mysql' );
 	   	$format= 'Y-m-d H:i:s';
-	   	$next_time = date_i18n( $format, strtotime( $current_time . '+1 hours' ) );
+	   	// $next_time = date_i18n( $format, strtotime( $current_time . '+1 hours' ) );
+	   	$next_time = date_i18n( $format, strtotime( $current_time . '+30 minutes' ) );
 
-	    $query = "SELECT * FROM {$table_appointments} AS wr_p WHERE wr_p.app_time BETWEEN '$current_time' AND '$next_time' ORDER BY wr_p.app_time ASC";
-
-	    
+	    $query = "SELECT * FROM {$table_appointments} AS wr_p WHERE wr_p.app_time BETWEEN '$current_time' AND '$next_time' AND wr_p.app_status = 'upcoming' ORDER BY wr_p.app_time ASC";
 	    $results = $wpdb->get_results( $query );
 
-
 	    if(  !empty( $results )){
+		    $wt_appointments = get_option('wt_appointments_options');
 		    foreach ($results as $key => $value) {
 
-		    	$fullname = $value->app_name;
-		    	$body = "
-		    	Hi, $fullname<br>
-			    	Your Appointment are as below<br>
-			    	Time:	{$value->app_time}
-			    ";
+		    	$request = array();
+		        $request['subject'] = $wt_appointments['hourly']['subject'];
+			    $request['heading'] = $wt_appointments['hourly']['heading'];
+			    $request['body'] = apply_filters('the_content', get_option('wt_hourly_body'));
 
-		    	$request = array(
-			    	'subject' => "Appointment reminder",
-			    	'heading' => "Appointment reminder",
-			    	'body' => $body,
-			    	'fullname' => $value->app_name,
-			    	'sent_to' => $value->app_email,
-			    );
+			    $event_date = date_i18n( "M d, Y", strtotime( $value->app_user_time ) );
+			    $event_time = date_i18n( "h:i A", strtotime( $value->app_user_time ) );
 
-			    $this->load_edm_template("", '', $request);
-			    $this->wt_add_log_file("hourly", $value->app_email);
+			    $request['sent_to'] = $value->app_email;
+			    $request['event_date'] = $event_date;
+			    $request['event_time'] = $event_time;
+			    $request['invitee_full_name'] = $value->app_name;
+			    $request['event_host_name'] = "Admin";
+			    // $request['save_file'] = true;
+
+				$email->load_edm_template("", "", $request);
+
+				// $email->wt_add_log_file("hourly", $request['sent_to']);
+
+
+				$request = array();
+		        $request['subject'] = $wt_appointments['hourly']['subject'];
+			    $request['heading'] = $wt_appointments['hourly']['heading'].' Time Test';
+			    $request['body'] = apply_filters('the_content', get_option('wt_hourly_body'));
+
+			    $event_date = date_i18n( "M d, Y", strtotime( $value->app_time ) );
+			    $event_time = date_i18n( "h:i A", strtotime( $value->app_time ) );
+
+			    $request['sent_to'] = $this->admin_email;
+			    $request['event_date'] = $event_date;
+			    $request['event_time'] = $event_time;
+			    $request['invitee_full_name'] = "Admin";
+			    $request['event_host_name'] = "Admin";
+			    // $request['save_file'] = true;
+			    // $request['die'] = true;
+
+				$email->load_edm_template("", "", $request);
+				// $email->wt_add_log_file("hourly_admin", $request['sent_to']);
+
 		    }
 	    }
 	}
@@ -156,109 +213,64 @@ class Wt_Appointment_Email_Schedule {
 	 */
 	public function wt_daily_email_schedule_fun() {
 		global $wpdb;
+
+		$email = new Wt_Appointment_Email( $this->plugin_name, $this->version );
+
 	    $table_appointments = $wpdb->prefix . "wt_appointments";
 
 	   	$current_time = current_time( 'mysql' );
 
-	   	$next_week_start = date_i18n( 'Y-m-d 00:00:00', strtotime( $current_time . '+7 days' ) );
-	   	$next_week_end = date_i18n( 'Y-m-d 23:59:00', strtotime( $current_time . '+7 days' ) );
+	   	$next_week_start = date_i18n( 'Y-m-d 00:00:00', strtotime( $current_time . '+1 days' ) );
+	   	$next_week_end = date_i18n( 'Y-m-d 23:59:00', strtotime( $current_time . '+1 days' ) );
 
-	    $query = "SELECT * FROM {$table_appointments} AS wr_p WHERE wr_p.app_time BETWEEN '$next_week_start' AND '$next_week_end' ORDER BY wr_p.app_time ASC";
+	    $query = "SELECT * FROM {$table_appointments} AS wr_p WHERE wr_p.app_time BETWEEN '$next_week_start' AND '$next_week_end' AND wr_p.app_status = 'upcoming' ORDER BY wr_p.app_time ASC";
 
-	    
 	    $results = $wpdb->get_results( $query );
 
-
 	    if(  !empty( $results )){
+		    $wt_appointments = get_option('wt_appointments_options');
 		    foreach ($results as $key => $value) {
 
-		    	$fullname = $value->app_name;
-		    	$body = "
-		    	Hi, $fullname<br>
-			    	Your Appointment are as below<br>
-			    	Time:	{$value->app_time}
-			    ";
+		    	$request = array();
+		        $request['subject'] = $wt_appointments['daily']['subject'];
+			    $request['heading'] = $wt_appointments['daily']['heading'];
+			    $request['body'] = apply_filters('the_content', get_option('wt_daily_body'));
 
-		    	$request = array(
-			    	'subject' => "Appointment reminder",
-			    	'heading' => "Appointment reminder",
-			    	'body' => $body,
-			    	'fullname' => $value->app_name,
-			    	'sent_to' => $value->app_email,
-			    );
+			    $event_date = date_i18n( "M d, Y", strtotime( $value->app_user_time ) );
+			    $event_time = date_i18n( "h:i A", strtotime( $value->app_user_time ) );
 
-			    $this->load_edm_template("", '', $request);
-			    $this->wt_add_log_file("daily", $value->app_email);
+			    $request['sent_to'] = $value->app_email;
+			    $request['event_date'] = $event_date;
+			    $request['event_time'] = $event_time;
+			    $request['invitee_full_name'] = $value->app_name;
+			    $request['event_host_name'] = "Admin";
+			    // $request['save_file'] = true;
+			    // $request['die'] = true;
+
+				$email->load_edm_template("", "", $request);
+
+				// $email->wt_add_log_file("daily", $request['sent_to']);
+
+				$request = array();
+		        $request['subject'] = $wt_appointments['daily']['subject'];
+			    $request['heading'] = $wt_appointments['daily']['heading'].' Time Test';
+			    $request['body'] = apply_filters('the_content', get_option('wt_daily_body'));
+
+			    $event_date = date_i18n( "M d, Y", strtotime( $value->app_time ) );
+			    $event_time = date_i18n( "h:i A", strtotime( $value->app_time ) );
+
+			    $request['sent_to'] = $this->admin_email;
+			    $request['event_date'] = $event_date;
+			    $request['event_time'] = $event_time;
+			    $request['invitee_full_name'] = "Admin";
+			    $request['event_host_name'] = "Admin";
+			    // $request['save_file'] = true;
+			    
+				$email->load_edm_template("", "", $request);
+				// $email->wt_add_log_file("daily_admin", $request['sent_to']);
+
 		    }
 	    }
 	}
-
-	public function wt_add_log_file($name, $text){
-
-        $date = date("d_g");
-        $file = $this->wt_path."/{$name}-{$date}.txt"; 
-        $myfile = fopen($file, "a") or die("Unable to open file!");
-        fwrite($myfile, "$text"."\n");
-        fclose($myfile);
-    }
-
-    // ==============================================================================
-	// Load EDM global
-	// ==============================================================================
-	function load_edm_template($acf_group = '', $extra_body = '', $request = array()) {
-
-		$email_dir_url = plugin_dir_url( __DIR__ ) ."templates/emails/";
-
-		$html = file_get_contents( $email_dir_url ."/edm-header.html" );
-	    $html .= file_get_contents( $email_dir_url ."/edm-body.html" );
-	    $html .= file_get_contents( $email_dir_url ."/edm-footer.html" );
-
-
-	    $site_url = site_url();
-	    $logo = $email_dir_url."images/logo.png";
-	    
-	    $email = "contact@fitnessintellect.com";
-	    $phone = '';
-	    $edm_tel = preg_replace('/\D/', '', $phone);
-	    $footer_detail = "Fitness Intellect";
-
-
-	    $subject = $request['subject'];
-	    $heading = $request['heading'];	    
-	    $body = $request['body'];
-
-	    ## if add extra detail more them backend option
-	    $body .= $extra_body;
-
-	    $request['save_file'] = true;
-
-	    $fullname = $request['fullname'];
-	    $sent_to = $request['sent_to'];
-
-	    $admin_email = get_option('admin_email');
-
-	    $site_title = html_entity_decode(get_bloginfo( 'name' ));
-
-	    $headers[] = 'From: '.$site_title.' <'.$admin_email.'>';
-	    $headers[] = 'Content-Type: text/html; charset=UTF-8';
-
-	    ## this for backend content
-	    $find = array('{{logo}}', '{{fullname}}', '{{edm_email}}', '{{edm_phone}}','{{edm_tel}}', '{{footer_edm_text}}', '{{heading}}', '{{edm_body}}', '{{site_url}}');
-	    $replace = array($logo, $fullname, $email, $phone, $edm_tel, $footer_detail, $heading, $body, $site_url);
-
-	    $html = str_replace($find, $replace, $html);
-
-	    $find = array('{{logo}}', '{{fullname}}', '{{edm_email}}', '{{edm_phone}}','{{edm_tel}}', '{{footer_edm_text}}', '{{heading}}', '{{edm_body}}', '{{site_url}}');
-	    $replace = array($logo, $fullname, $email, $phone, $edm_tel, $footer_detail, $heading, $body, $site_url);
-
-	    $body = str_replace($find, $replace, $html);
-
-	    if( isset( $request['die'] ) ){
-		    echo $body;die;
-	    }
-	    
-	    if( !empty( $subject ) ){
-	    	$sent = wp_mail($sent_to, $subject, $body, $headers);
-	    }
-	}
+ 
 }
